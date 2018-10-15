@@ -19,13 +19,4 @@ public class Fork extends ReentrantLock {
 	public void putDownUnstructured() {
 		unlock();
 	}
-
-	public synchronized void pickUpStructured() {
-
-	}
-
-	public void putDownStructured() {
-
-	}
-
 }
