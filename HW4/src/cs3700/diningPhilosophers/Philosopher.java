@@ -6,29 +6,27 @@ public class Philosopher implements Runnable {
 	private Random rand;
 	private int id;
 	private int timesEaten;
-	private ForkStructured leftFork;
-	private ForkStructured rightFork;
+	private Fork leftFork;
+	private Fork rightFork;
+	private boolean useStructuredLocks;
 
-	Philosopher(int id, ForkStructured leftFork, ForkStructured rightFork) {
-		rand = new Random();
+	Philosopher(int id, Fork leftFork, Fork rightFork,
+			boolean useStructuredLocks) {
 		setId(id);
+		rand = new Random();
+		setTimesEaten(0);
 		setLeftFork(leftFork);
 		setRightFork(rightFork);
-		setTimesEaten(0);
+		setUseStructuredLocks(useStructuredLocks);
 	}
 
 	@Override
 	public void run() {
 		try {
-			while (true) {
-				think();
-				if (leftFork.pickUp(id)) {
-					if (rightFork.pickUp(id)) {
-						eat();
-						rightFork.putDown(id);
-					}
-					leftFork.putDown(id);
-				}
+			if (useStructuredLocks) {
+				runStructured();
+			} else {
+				runUnstructured();
 			}
 		} catch (InterruptedException e) {
 			// This philosopher has been interrupted!
@@ -36,6 +34,33 @@ public class Philosopher implements Runnable {
 			System.out.printf("Philosopher %d has eaten %d times!%n", id,
 					timesEaten);
 		}
+	}
+
+	private void runStructured() throws InterruptedException {
+		while (true) {
+			think();
+			synchronized (leftFork) {
+				synchronized (rightFork) {
+					eat();
+				}
+			}
+		}
+	}
+
+	private void runUnstructured() throws InterruptedException {
+		while (true) {
+			think();
+			leftFork.pickUpUnstructured();
+			rightFork.pickUpUnstructured();
+			eat();
+			if (rightFork.isHeldByCurrentThread()) {
+				rightFork.putDownUnstructured();
+			}
+			if (leftFork.isHeldByCurrentThread()) {
+				leftFork.putDownUnstructured();
+			}
+		}
+
 	}
 
 	private void think() throws InterruptedException {
@@ -57,19 +82,19 @@ public class Philosopher implements Runnable {
 		this.id = id;
 	}
 
-	public ForkStructured getLeftFork() {
+	public Fork getLeftFork() {
 		return leftFork;
 	}
 
-	public void setLeftFork(ForkStructured leftFork) {
+	public void setLeftFork(Fork leftFork) {
 		this.leftFork = leftFork;
 	}
 
-	public ForkStructured getRightFork() {
+	public Fork getRightFork() {
 		return rightFork;
 	}
 
-	public void setRightFork(ForkStructured rightFork) {
+	public void setRightFork(Fork rightFork) {
 		this.rightFork = rightFork;
 	}
 
@@ -79,6 +104,10 @@ public class Philosopher implements Runnable {
 
 	public int getTimesEaten() {
 		return timesEaten;
+	}
+
+	public void setUseStructuredLocks(boolean useStructuredLocks) {
+		this.useStructuredLocks = useStructuredLocks;
 	}
 
 }
