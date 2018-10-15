@@ -65,13 +65,13 @@ public class Philosopher implements Runnable {
 
 	private void think() throws InterruptedException {
 		System.out.printf("Philosopher %d is thinking...%n", id);
-		Thread.sleep(1000 * (rand.nextInt(2) + 1));
+		Thread.sleep(1000 * (rand.nextInt(5) + 1));
 	}
 
 	private void eat() throws InterruptedException {
 		System.out.printf("Philosopher %d is eating...%n", id);
 		timesEaten++;
-		Thread.sleep(1000 * (rand.nextInt(5) + 1));
+		Thread.sleep(1000 * (rand.nextInt(10) + 1));
 	}
 
 	public int getId() {

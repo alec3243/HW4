@@ -32,7 +32,7 @@ public class Main {
 			executor.execute(philosopher);
 		}
 		long start = System.currentTimeMillis();
-		while (System.currentTimeMillis() - start < 1) { // 2 minutes
+		while (System.currentTimeMillis() - start < 120000) { // 2 minutes
 			Thread.yield();
 		}
 		executor.shutdownNow();
